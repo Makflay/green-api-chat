@@ -2,6 +2,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import "./App.css";
 
+import { CredentialsForm } from "./components/CredentialsForm";
+
 function App() {
   return (
     <Box
@@ -28,9 +30,7 @@ function App() {
           Green API Chat
         </Typography>
 
-        <Typography variant="body1" color="text.secondary">
-          Базовая тема Green API Chat.
-        </Typography>
+        <CredentialsForm />
       </Box>
     </Box>
   );

@@ -1,0 +1,64 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { styled } from "@mui/material/styles";
+
+export const Screen = styled("main")(({ theme }) => ({
+  minHeight: "100dvh",
+  display: "grid",
+  placeItems: "center",
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.background.default,
+}));
+
+export const Card = styled("section")(({ theme }) => ({
+  width: "100%",
+  maxWidth: 420,
+  padding: theme.spacing(4),
+  backgroundColor: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 8px 32px rgba(23, 25, 28, 0.04)",
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(3),
+  },
+}));
+
+export const Header = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(3),
+}));
+
+export const Form = styled("form")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+}));
+
+export const Field = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: theme.palette.background.paper,
+
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.divider,
+    },
+
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.text.secondary,
+    },
+
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
+
+export const ConnectButton = styled(Button)(({ theme }) => ({
+  minHeight: 48,
+  marginTop: theme.spacing(1),
+  fontSize: theme.typography.body1.fontSize,
+  textTransform: "none",
+}));
