@@ -1,10 +1,18 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import "./App.css";
 
 import { CredentialsForm } from "./components/CredentialsForm";
+import type { Credentials } from "./components/CredentialsForm";
 
 function App() {
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
+
+  if (!credentials) {
+    return <CredentialsForm onConnect={setCredentials} />;
+  }
+
   return (
     <Box
       component="main"
@@ -29,8 +37,6 @@ function App() {
         <Typography variant="h1" sx={{ color: "primary.main", mb: 1 }}>
           Green API Chat
         </Typography>
-
-        <CredentialsForm />
       </Box>
     </Box>
   );

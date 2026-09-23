@@ -1,4 +1,6 @@
+import { useState } from "react";
 import Typography from "@mui/material/Typography";
+import type { FormEvent } from "react";
 import {
   Card,
   ConnectButton,
@@ -8,7 +10,39 @@ import {
   Screen,
 } from "./CredentialsForm.styles";
 
-export function CredentialsForm() {
+export type Credentials = {
+  idInstance: string;
+  apiTokenInstance: string;
+};
+
+type CredentialsFormProps = {
+  onConnect: (credentials: Credentials) => void;
+};
+
+export function CredentialsForm({ onConnect }: CredentialsFormProps) {
+  const [idInstance, setIdInstance] = useState("");
+  const [apiTokenInstance, setApiTokenInstance] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const idInstanceError = submitted && !idInstance.trim();
+  const apiTokenInstanceError = submitted && !apiTokenInstance.trim();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitted(true);
+
+    const credentials: Credentials = {
+      idInstance: idInstance.trim(),
+      apiTokenInstance: apiTokenInstance.trim(),
+    };
+
+    if (!credentials.idInstance || !credentials.apiTokenInstance) {
+      return;
+    }
+
+    onConnect(credentials);
+  }
+
   return (
     <Screen>
       <Card aria-labelledby="credentials-title">
@@ -24,12 +58,18 @@ export function CredentialsForm() {
 
         <Form
           aria-labelledby="credentials-title"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
+          noValidate
         >
           <Field
             id="idInstance"
             name="idInstance"
             label="idInstance"
+            value={idInstance}
+            onChange={(event) => setIdInstance(event.target.value)}
+            error={idInstanceError}
+            helperText={idInstanceError ? "Введите idInstance." : undefined}
+            required
             variant="outlined"
             fullWidth
             autoComplete="off"
@@ -46,6 +86,13 @@ export function CredentialsForm() {
             name="apiTokenInstance"
             label="apiTokenInstance"
             type="password"
+            value={apiTokenInstance}
+            onChange={(event) => setApiTokenInstance(event.target.value)}
+            error={apiTokenInstanceError}
+            helperText={
+              apiTokenInstanceError ? "Введите apiTokenInstance." : undefined
+            }
+            required
             variant="outlined"
             fullWidth
             autoComplete="off"
