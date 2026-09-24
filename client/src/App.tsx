@@ -1,10 +1,9 @@
 import { useState } from "react";
 import "./App.css";
+import type { Chat, Credentials, Message } from "./types/chat";
 
 import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
 import { MessengerLayout } from "./components/MessengerLayout/MessengerLayout";
-
-import type { Chat, Credentials } from "./types/chat";
 
 function App() {
   const [credentials, setCredentials] = useState<Credentials | null>(null);
@@ -32,6 +31,33 @@ function App() {
     setActiveChatId(chatId);
   }
 
+  function handleSendMessage(text: string) {
+    const trimmedText = text.trim();
+
+    if (!activeChat || !trimmedText) {
+      return;
+    }
+
+    const targetChatId = activeChat.id;
+
+    const message: Message = {
+      id: crypto.randomUUID(),
+      text: trimmedText,
+      direction: "outgoing",
+    };
+
+    setChats((currentChats) =>
+      currentChats.map((chat) =>
+        chat.id === targetChatId
+          ? {
+              ...chat,
+              messages: [...chat.messages, message],
+            }
+          : chat,
+      ),
+    );
+  }
+
   if (credentials) {
     return <CredentialsForm onConnect={setCredentials} />;
   }
@@ -43,6 +69,7 @@ function App() {
       activeChat={activeChat}
       onCreateChat={handleCreateChat}
       onSelectChat={handleSelectChat}
+      onSendMessage={handleSendMessage}
     />
   );
 }

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from "react";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import {
   Composer,
@@ -19,6 +20,24 @@ export function MessageInput({
   onSubmit,
   disabled = false,
 }: MessageInputProps) {
+  const canSubmit = !disabled && value.trim().length > 0;
+
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (canSubmit && !event.repeat) {
+      onSubmit();
+    }
+  }
+
   return (
     <InputPanel>
       <Composer>
@@ -32,6 +51,7 @@ export function MessageInput({
           disabled={disabled}
           inputProps={{
             "aria-label": "Текст сообщения",
+            onKeyDown: handleKeyDown,
           }}
         />
 

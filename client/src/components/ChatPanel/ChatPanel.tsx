@@ -9,13 +9,21 @@ import { MessageInput } from "../MessageInput/MessageInput";
 
 type ChatPanelProps = {
   chat: Chat | null;
+  onSendMessage: (text: string) => void;
 };
 
-export function ChatPanel({ chat }: ChatPanelProps) {
+export function ChatPanel({ chat, onSendMessage }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
 
   function handleSubmit() {
-    console.log("ChatPanel handleSubmit");
+    const text = draft.trim();
+
+    if (!chat || !text) {
+      return;
+    }
+
+    onSendMessage(text);
+    setDraft("");
   }
 
   return (
