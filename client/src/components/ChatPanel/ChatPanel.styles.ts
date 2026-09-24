@@ -7,6 +7,7 @@ export const PanelRoot = styled(Box)(({ theme }) => ({
   minWidth: 0,
   minHeight: 0,
   backgroundColor: theme.palette.primary.light,
+  overflow: "hidden",
 })) as typeof Box;
 
 export const PanelContent = styled(Box)(({ theme }) => ({
