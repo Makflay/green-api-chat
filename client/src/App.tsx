@@ -2,21 +2,19 @@ import { useState } from "react";
 import "./App.css";
 
 import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
-import type { Credentials } from "./components/CredentialsForm/CredentialsForm";
 import { MessengerLayout } from "./components/MessengerLayout/MessengerLayout";
-import type { LocalChat } from "./components/NewChatForm/NewChatForm";
+
+import type { Chat, Credentials } from "./types/chat";
 
 function App() {
   const [credentials, setCredentials] = useState<Credentials | null>(null);
-  const [chats, setChats] = useState<LocalChat[]>([]);
-  const [activePhoneNumber, setActivePhoneNumber] = useState<string | null>(
-    null,
-  );
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  function handleCreateChat(chat: LocalChat) {
+  function handleCreateChat(chat: Chat) {
     setChats((currentChats) => {
       const alreadyExists = currentChats.some(
-        (existingChat) => existingChat.phoneNumber === chat.phoneNumber,
+        (existingChat) => existingChat.phone === chat.phone,
       );
 
       if (alreadyExists) {
@@ -26,7 +24,7 @@ function App() {
       return [...currentChats, chat];
     });
 
-    setActivePhoneNumber(chat.phoneNumber);
+    setActiveChatId(chat.id);
   }
 
   if (credentials) {
@@ -36,9 +34,9 @@ function App() {
   return (
     <MessengerLayout
       chats={chats}
-      activePhoneNumber={activePhoneNumber}
+      activeChatId={activeChatId}
       onCreateChat={handleCreateChat}
-      onSelectChat={setActivePhoneNumber}
+      onSelectChat={setActiveChatId}
     />
   );
 }

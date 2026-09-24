@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Typography from "@mui/material/Typography";
 import type { FormEvent } from "react";
+import type { Credentials } from "../../types/chat";
 import {
   Card,
   ConnectButton,
@@ -9,11 +10,6 @@ import {
   Header,
   Screen,
 } from "./CredentialsForm.styles";
-
-export type Credentials = {
-  idInstance: string;
-  apiTokenInstance: string;
-};
 
 type CredentialsFormProps = {
   onConnect: (credentials: Credentials) => void;

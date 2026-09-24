@@ -10,13 +10,10 @@ import {
   FormRoot,
   FormTitle,
 } from "./NewChatForm.styles";
-
-export type LocalChat = {
-  phoneNumber: string;
-};
+import type { Chat } from "../../types/chat";
 
 type NewChatFormProps = {
-  onCreate: (chat: LocalChat) => void;
+  onCreate: (chat: Chat) => void;
   onClose: () => void;
 };
 
@@ -53,7 +50,7 @@ export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
       return;
     }
 
-    onCreate({ phoneNumber: normalized });
+    onCreate({ id: normalized, phone: normalized });
   }
 
   return (

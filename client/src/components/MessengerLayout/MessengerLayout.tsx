@@ -2,18 +2,18 @@ import { LayoutRoot } from "./MessengerLayout.styles";
 import { NavigationRail } from "../NavigationRail/NavigationRail";
 import { ChatsSidebar } from "../ChatsSidebar/ChatsSidebar";
 import { ChatPanel } from "../ChatPanel/ChatPanel";
-import type { LocalChat } from "../NewChatForm/NewChatForm";
+import type { Chat } from "../../types/chat";
 
 type MessengerLayoutProps = {
-  chats: LocalChat[];
-  activePhoneNumber: string | null;
-  onCreateChat: (chat: LocalChat) => void;
-  onSelectChat: (phoneNumber: string) => void;
+  chats: Chat[];
+  activeChatId: string | null;
+  onCreateChat: (chat: Chat) => void;
+  onSelectChat: (chatId: string) => void;
 };
 
 export function MessengerLayout({
   chats,
-  activePhoneNumber,
+  activeChatId,
   onCreateChat,
   onSelectChat,
 }: MessengerLayoutProps) {
@@ -22,7 +22,7 @@ export function MessengerLayout({
       <NavigationRail />
       <ChatsSidebar
         chats={chats}
-        activePhoneNumber={activePhoneNumber}
+        activeChatId={activeChatId}
         onCreateChat={onCreateChat}
         onSelectChat={onSelectChat}
       />

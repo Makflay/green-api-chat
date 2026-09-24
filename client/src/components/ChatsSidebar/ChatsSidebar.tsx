@@ -14,24 +14,24 @@ import {
   ChatNumber,
 } from "./ChatsSidebar.styles";
 import { NewChatForm } from "../NewChatForm/NewChatForm";
-import type { LocalChat } from "../NewChatForm/NewChatForm";
+import type { Chat } from "../../types/chat";
 
 type ChatsSidebarProps = {
-  chats: LocalChat[];
-  activePhoneNumber: string | null;
-  onCreateChat: (chat: LocalChat) => void;
-  onSelectChat: (phoneNumber: string) => void;
+  chats: Chat[];
+  activeChatId: string | null;
+  onCreateChat: (chat: Chat) => void;
+  onSelectChat: (chatId: string) => void;
 };
 
 export function ChatsSidebar({
   chats,
-  activePhoneNumber,
+  activeChatId,
   onCreateChat,
   onSelectChat,
 }: ChatsSidebarProps) {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
 
-  function handleCreateChat(chat: LocalChat) {
+  function handleCreateChat(chat: Chat) {
     onCreateChat(chat);
     setIsNewChatOpen(false);
   }
@@ -62,19 +62,19 @@ export function ChatsSidebar({
         ) : (
           <ChatList aria-label="Список чатов">
             {chats.map((chat) => {
-              const isActive = chat.phoneNumber === activePhoneNumber;
+              const isActive = chat.id === activeChatId;
 
               return (
-                <ListItem key={chat.phoneNumber} disablePadding>
+                <ListItem key={chat.id} disablePadding>
                   <ChatItem
                     component="button"
                     type="button"
                     selected={isActive}
                     aria-current={isActive ? "true" : undefined}
-                    onClick={() => onSelectChat(chat.phoneNumber)}
+                    onClick={() => onSelectChat(chat.id)}
                     disableRipple
                   >
-                    <ChatNumber component="span">{chat.phoneNumber}</ChatNumber>
+                    <ChatNumber component="span">{chat.phone}</ChatNumber>
                   </ChatItem>
                 </ListItem>
               );
