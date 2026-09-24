@@ -1,6 +1,8 @@
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
 import { styled } from "@mui/material/styles";
 
 export const SidebarRoot = styled(Box)(({ theme }) => ({
@@ -72,3 +74,37 @@ export const EmptyStateText = styled(Typography)(({ theme }) => ({
   ...theme.typography.body2,
   color: theme.palette.text.secondary,
 }));
+
+export const ChatList = styled(List)(({ theme }) => ({
+  padding: theme.spacing(1, 0),
+}));
+
+export const ChatItem = styled(ListItemButton)(({ theme }) => ({
+  minHeight: 72,
+  padding: theme.spacing(2),
+  color: theme.palette.text.primary,
+
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+
+  "&.Mui-selected": {
+    backgroundColor: theme.palette.action.selected,
+  },
+
+  "&.Mui-selected:hover": {
+    backgroundColor: theme.palette.action.selected,
+  },
+
+  "&.Mui-focusVisible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: -2,
+  },
+})) as typeof ListItemButton;
+
+export const ChatNumber = styled(Typography)(({ theme }) => ({
+  ...theme.typography.body1,
+  fontWeight: theme.typography.fontWeightMedium,
+  overflowWrap: "anywhere",
+  minWidth: 0,
+})) as typeof Typography;
