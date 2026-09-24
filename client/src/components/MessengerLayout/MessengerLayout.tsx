@@ -28,7 +28,7 @@ export function MessengerLayout({
         onCreateChat={onCreateChat}
         onSelectChat={onSelectChat}
       />
-      <ChatPanel chat={activeChat} />
+      <ChatPanel key={activeChat?.id ?? "no-active-chat"} chat={activeChat} />
     </LayoutRoot>
   );
 }
