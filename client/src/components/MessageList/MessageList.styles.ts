@@ -9,6 +9,7 @@ export const ListViewport = styled(Box)(({ theme }) => ({
   minWidth: 0,
   minHeight: 0,
   overflowY: "auto",
+  scrollbarGutter: "stable",
   padding: theme.spacing(3),
 }));
 

@@ -9,34 +9,52 @@ import {
   Form,
   Header,
   Screen,
+  ConnectLabel,
+  ConnectProgress,
 } from "./CredentialsForm.styles";
 
 type CredentialsFormProps = {
   onConnect: (credentials: Credentials) => void;
+  loading?: boolean;
 };
 
-export function CredentialsForm({ onConnect }: CredentialsFormProps) {
+export function CredentialsForm({
+  onConnect,
+  loading = false,
+}: CredentialsFormProps) {
   const [idInstance, setIdInstance] = useState("");
   const [apiTokenInstance, setApiTokenInstance] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState({
+    idInstance: false,
+    apiTokenInstance: false,
+  });
 
-  const idInstanceError = submitted && !idInstance.trim();
-  const apiTokenInstanceError = submitted && !apiTokenInstance.trim();
+  const idInstanceError = touched.idInstance && !idInstance.trim();
+  const apiTokenInstanceError =
+    touched.apiTokenInstance && !apiTokenInstance.trim();
+  const canConnect =
+    Boolean(idInstance.trim()) && Boolean(apiTokenInstance.trim());
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
 
-    const credentials: Credentials = {
-      idInstance: idInstance.trim(),
-      apiTokenInstance: apiTokenInstance.trim(),
-    };
-
-    if (!credentials.idInstance || !credentials.apiTokenInstance) {
+    if (loading) {
       return;
     }
 
-    onConnect(credentials);
+    setTouched({
+      idInstance: true,
+      apiTokenInstance: true,
+    });
+
+    if (!canConnect) {
+      return;
+    }
+
+    onConnect({
+      idInstance: idInstance.trim(),
+      apiTokenInstance: apiTokenInstance.trim(),
+    });
   }
 
   return (
@@ -63,8 +81,12 @@ export function CredentialsForm({ onConnect }: CredentialsFormProps) {
             label="idInstance"
             value={idInstance}
             onChange={(event) => setIdInstance(event.target.value)}
+            disabled={loading}
+            onBlur={() =>
+              setTouched((current) => ({ ...current, idInstance: true }))
+            }
             error={idInstanceError}
-            helperText={idInstanceError ? "Введите idInstance." : undefined}
+            helperText={idInstanceError ? "Введите idInstance." : ""}
             required
             variant="outlined"
             fullWidth
@@ -84,9 +106,13 @@ export function CredentialsForm({ onConnect }: CredentialsFormProps) {
             type="password"
             value={apiTokenInstance}
             onChange={(event) => setApiTokenInstance(event.target.value)}
+            disabled={loading}
+            onBlur={() =>
+              setTouched((current) => ({ ...current, apiTokenInstance: true }))
+            }
             error={apiTokenInstanceError}
             helperText={
-              apiTokenInstanceError ? "Введите apiTokenInstance." : undefined
+              apiTokenInstanceError ? "Введите apiTokenInstance." : ""
             }
             required
             variant="outlined"
@@ -105,8 +131,17 @@ export function CredentialsForm({ onConnect }: CredentialsFormProps) {
             variant="contained"
             fullWidth
             disableElevation
+            disabled={!canConnect || loading}
           >
-            Connect
+            <ConnectLabel $loading={loading}>Connect</ConnectLabel>
+
+            {loading && (
+              <ConnectProgress
+                size={18}
+                color="inherit"
+                aria-label="Подключение"
+              />
+            )}
           </ConnectButton>
         </Form>
       </Card>

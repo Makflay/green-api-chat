@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import { styled } from "@mui/material/styles";
 
 export const Screen = styled("main")(({ theme }) => ({
@@ -61,4 +62,15 @@ export const ConnectButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(1),
   fontSize: theme.typography.body1.fontSize,
   textTransform: "none",
+  position: "relative",
 }));
+
+export const ConnectLabel = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$loading",
+})<{ $loading: boolean }>(({ $loading }) => ({
+  visibility: $loading ? "hidden" : "visible",
+}));
+
+export const ConnectProgress = styled(CircularProgress)({
+  position: "absolute",
+});

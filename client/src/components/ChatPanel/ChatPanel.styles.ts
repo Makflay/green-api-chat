@@ -17,3 +17,15 @@ export const PanelContent = styled(Box)(({ theme }) => ({
   overflowY: "auto",
   padding: theme.spacing(3),
 }));
+
+export const NoChatState = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+  overflowY: "auto",
+  padding: theme.spacing(3),
+  textAlign: "center",
+}));

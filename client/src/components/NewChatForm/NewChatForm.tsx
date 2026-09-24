@@ -9,46 +9,68 @@ import {
   FormDialog,
   FormRoot,
   FormTitle,
+  CreateLabel,
+  CreateProgress,
 } from "./NewChatForm.styles";
 import type { Chat } from "../../types/chat";
 
 type NewChatFormProps = {
   onCreate: (chat: Chat) => void;
   onClose: () => void;
+  loading?: boolean;
 };
 
 function normalizePhoneNumber(value: string) {
   return value.replace(/[^\d+]/g, "");
 }
 
-export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
+function getPhoneError(value: string): string {
+  if (!value.trim()) {
+    return "Введите номер телефона.";
+  }
+
+  if (/\p{L}/u.test(value)) {
+    return "Номер телефона не должен содержать буквы.";
+  }
+
+  const normalized = normalizePhoneNumber(value);
+
+  if (!/\d/.test(normalized)) {
+    return "Номер телефона должен содержать цифры.";
+  }
+
+  if (!/^\+?\d+$/.test(normalized)) {
+    return "Знак + допустим только один раз в начале номера.";
+  }
+
+  return "";
+}
+
+export function NewChatForm({
+  onCreate,
+  onClose,
+  loading = false,
+}: NewChatFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [error, setError] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const validationError = getPhoneError(phoneNumber);
+  const visibleError = touched ? validationError : "";
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!phoneNumber.trim()) {
-      setError("Введите номер телефона.");
+    if (loading) {
       return;
     }
 
-    if (/\p{L}/u.test(phoneNumber)) {
-      setError("Номер телефона не должен содержать буквы.");
+    setTouched(true);
+
+    if (validationError) {
       return;
     }
 
     const normalized = normalizePhoneNumber(phoneNumber);
-
-    if (!/\d/.test(normalized)) {
-      setError("Номер телефона должен содержать цифры.");
-      return;
-    }
-
-    if (!/^\+?\d+$/.test(normalized)) {
-      setError("Знак + допустим только один раз в начале номера.");
-      return;
-    }
 
     onCreate({ id: normalized, phone: normalized, messages: [] });
   }
@@ -56,12 +78,12 @@ export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
   return (
     <FormDialog
       open
-      onClose={onClose}
+      onClose={loading ? undefined : onClose}
       fullWidth
       maxWidth="xs"
       aria-labelledby="new-chat-title"
     >
-      <FormRoot onSubmit={handleSubmit} noValidate>
+      <FormRoot onSubmit={handleSubmit} noValidate aria-busy={loading}>
         <FormTitle id="new-chat-title">Новый чат</FormTitle>
 
         <FormContent>
@@ -78,20 +100,33 @@ export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
             value={phoneNumber}
             onChange={(event) => {
               setPhoneNumber(event.target.value);
-              setError("");
             }}
-            error={Boolean(error)}
-            helperText={error || "Введите номер с кодом страны."}
+            onBlur={() => setTouched(true)}
+            disabled={loading}
+            error={Boolean(visibleError)}
+            helperText={visibleError || "Введите номер с кодом страны."}
           />
         </FormContent>
 
         <FormActions>
-          <Button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose} disabled={loading}>
             Отмена
           </Button>
 
-          <CreateButton type="submit" variant="contained" disableElevation>
-            Создать чат
+          <CreateButton
+            type="submit"
+            variant="contained"
+            disableElevation
+            disabled={Boolean(validationError) || loading}
+          >
+            <CreateLabel $loading={loading}>Создать чат</CreateLabel>
+            {loading && (
+              <CreateProgress
+                size={18}
+                color="inherit"
+                aria-label="Создание чата"
+              />
+            )}
           </CreateButton>
         </FormActions>
       </FormRoot>

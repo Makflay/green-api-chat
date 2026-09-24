@@ -3,6 +3,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import { styled } from "@mui/material/styles";
 
 export const FormDialog = styled(Dialog)(({ theme }) => ({
@@ -35,4 +36,15 @@ export const FormActions = styled(DialogActions)(({ theme }) => ({
 
 export const CreateButton = styled(Button)({
   minHeight: 40,
+  position: "relative",
+});
+
+export const CreateLabel = styled("span", {
+  shouldForwardProp: (prop) => prop !== "$loading",
+})<{ $loading: boolean }>(({ $loading }) => ({
+  visibility: $loading ? "hidden" : "visible",
+}));
+
+export const CreateProgress = styled(CircularProgress)({
+  position: "absolute",
 });

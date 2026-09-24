@@ -5,6 +5,7 @@ import {
   InputPanel,
   SendButton,
   TextInput,
+  SendProgress,
 } from "./MessageInput.styles";
 
 type MessageInputProps = {
@@ -12,6 +13,7 @@ type MessageInputProps = {
   onChange: (value: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export function MessageInput({
@@ -19,8 +21,16 @@ export function MessageInput({
   onChange,
   onSubmit,
   disabled = false,
+  loading = false,
 }: MessageInputProps) {
-  const canSubmit = !disabled && value.trim().length > 0;
+  const isInputDisabled = disabled || loading;
+  const canSubmit = !isInputDisabled && value.trim().length > 0;
+
+  function handleSubmit() {
+    if (canSubmit) {
+      onSubmit();
+    }
+  }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (
@@ -33,14 +43,14 @@ export function MessageInput({
 
     event.preventDefault();
 
-    if (canSubmit && !event.repeat) {
-      onSubmit();
+    if (!event.repeat) {
+      handleSubmit();
     }
   }
 
   return (
     <InputPanel>
-      <Composer>
+      <Composer aria-busy={loading}>
         <TextInput
           value={value}
           onChange={(event) => onChange(event.target.value)}
@@ -48,7 +58,7 @@ export function MessageInput({
           multiline
           minRows={1}
           maxRows={5}
-          disabled={disabled}
+          disabled={isInputDisabled}
           inputProps={{
             "aria-label": "Текст сообщения",
             onKeyDown: handleKeyDown,
@@ -57,12 +67,20 @@ export function MessageInput({
 
         <SendButton
           type="button"
-          aria-label="Отправить сообщение"
-          onClick={onSubmit}
-          disabled={disabled}
+          aria-label={loading ? "Отправка сообщения" : "Отправить сообщение"}
+          onClick={handleSubmit}
+          disabled={!canSubmit}
           disableRipple
         >
-          <SendRoundedIcon />
+          {loading ? (
+            <SendProgress
+              size={20}
+              color="inherit"
+              aria-label="Отправка сообщения"
+            />
+          ) : (
+            <SendRoundedIcon />
+          )}
         </SendButton>
       </Composer>
     </InputPanel>

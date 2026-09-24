@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Typography from "@mui/material/Typography";
-import { PanelRoot, PanelContent } from "./ChatPanel.styles";
+import { PanelRoot, PanelContent, NoChatState } from "./ChatPanel.styles";
 import type { Chat } from "../../types/chat";
 
 import { ChatHeader } from "../ChatHeader/ChatHeader";
@@ -41,9 +41,11 @@ export function ChatPanel({ chat, onSendMessage }: ChatPanelProps) {
           </>
         ) : (
           <PanelContent>
-            <Typography variant="body1" color="text.secondary">
-              Выберите или создайте чат.
-            </Typography>
+            <NoChatState>
+              <Typography variant="body1" color="text.secondary">
+                Выберите или создайте чат.
+              </Typography>
+            </NoChatState>
           </PanelContent>
         )}
       </>

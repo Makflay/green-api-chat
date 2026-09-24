@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
 import { styled } from "@mui/material/styles";
 
 export const InputPanel = styled(Box)(({ theme }) => ({
@@ -67,3 +68,7 @@ export const SendButton = styled(IconButton)(({ theme }) => ({
     fontSize: 22,
   },
 }));
+
+export const SendProgress = styled(CircularProgress)({
+  flexShrink: 0,
+});
