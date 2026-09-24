@@ -50,7 +50,7 @@ export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
       return;
     }
 
-    onCreate({ id: normalized, phone: normalized });
+    onCreate({ id: normalized, phone: normalized, messages: [] });
   }
 
   return (

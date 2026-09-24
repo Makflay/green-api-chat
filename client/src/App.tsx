@@ -11,20 +11,25 @@ function App() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
+  const activeChat = chats.find((chat) => chat.id === activeChatId) ?? null;
+
   function handleCreateChat(chat: Chat) {
-    setChats((currentChats) => {
-      const alreadyExists = currentChats.some(
-        (existingChat) => existingChat.phone === chat.phone,
-      );
+    const existingChat = chats.find(
+      (currentChat) => currentChat.phone === chat.phone,
+    );
 
-      if (alreadyExists) {
-        return currentChats;
-      }
+    if (existingChat) {
+      setActiveChatId(existingChat.id);
+      return;
+    }
 
-      return [...currentChats, chat];
-    });
+    setChats((currentChats) => [...currentChats, chat]);
 
     setActiveChatId(chat.id);
+  }
+
+  function handleSelectChat(chatId: string) {
+    setActiveChatId(chatId);
   }
 
   if (credentials) {
@@ -35,8 +40,9 @@ function App() {
     <MessengerLayout
       chats={chats}
       activeChatId={activeChatId}
+      activeChat={activeChat}
       onCreateChat={handleCreateChat}
-      onSelectChat={setActiveChatId}
+      onSelectChat={handleSelectChat}
     />
   );
 }

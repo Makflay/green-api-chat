@@ -7,6 +7,7 @@ import type { Chat } from "../../types/chat";
 type MessengerLayoutProps = {
   chats: Chat[];
   activeChatId: string | null;
+  activeChat: Chat | null;
   onCreateChat: (chat: Chat) => void;
   onSelectChat: (chatId: string) => void;
 };
@@ -14,6 +15,7 @@ type MessengerLayoutProps = {
 export function MessengerLayout({
   chats,
   activeChatId,
+  activeChat,
   onCreateChat,
   onSelectChat,
 }: MessengerLayoutProps) {
@@ -26,7 +28,7 @@ export function MessengerLayout({
         onCreateChat={onCreateChat}
         onSelectChat={onSelectChat}
       />
-      <ChatPanel />
+      <ChatPanel chat={activeChat} />
     </LayoutRoot>
   );
 }
