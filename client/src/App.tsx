@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import "./App.css";
 
 import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
@@ -6,13 +6,17 @@ import { MessengerLayout } from "./components/MessengerLayout/MessengerLayout";
 
 import * as greenApi from "./api/greenApi";
 import type { Chat, Message } from "./types/chat.type";
-import type { GreenApiCredentials } from "./types/greenApi.type";
+import type {
+  GreenApiCredentials,
+  ReceiveNotificationResponse,
+} from "./types/greenApi.type";
 
 import {
   getPhoneError,
   normalizePhoneNumber,
   resolveMaxChatId,
 } from "./utils/chatId";
+import { useNotifications } from "./hooks/useNotifications";
 
 function App() {
   const [credentials, setCredentials] = useState<GreenApiCredentials | null>(
@@ -28,6 +32,17 @@ function App() {
     localChatId: string;
     text: string;
   } | null>(null);
+
+  const lastNotificationRef = useRef<ReceiveNotificationResponse | null>(null);
+
+  const handleNotification = useCallback(
+    (notification: ReceiveNotificationResponse) => {
+      lastNotificationRef.current = notification;
+    },
+    [],
+  );
+
+  useNotifications(credentials, handleNotification);
 
   const activeChat = chats.find((chat) => chat.id === activeChatId) ?? null;
 

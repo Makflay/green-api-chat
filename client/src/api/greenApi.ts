@@ -1,4 +1,3 @@
-import type { Credentials } from "../types/chat.type";
 import type {
   DeleteNotificationRequest,
   SendMessageRequest,
@@ -6,6 +5,8 @@ import type {
   SendMessageResponse,
   CheckAccountRequest,
   CheckAccountResponse,
+  DeleteNotificationResponse,
+  ReceiveNotificationResponse,
 } from "../types/greenApi.type";
 
 export async function sendMessage(
@@ -62,18 +63,60 @@ export async function checkAccount(
   return response.json() as Promise<CheckAccountResponse>;
 }
 
-export const receiveNotification: (
-  credentials: Credentials,
-) => Promise<unknown> = () => {
-  return Promise.reject(
-    new Error("GREEN-API receiveNotification is not implemented."),
+export async function receiveNotification(
+  credentials: GreenApiCredentials,
+): Promise<ReceiveNotificationResponse | null> {
+  const { apiUrl, idInstance, apiTokenInstance } = credentials;
+  const baseUrl = apiUrl.replace(/\/+$/, "");
+
+  const response = await fetch(
+    `${baseUrl}/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`,
+    {
+      method: "GET",
+    },
   );
-};
+
+  if (!response.ok) {
+    throw new Error(
+      `GREEN-API ReceiveNotification failed with status ${response.status}`,
+    );
+  }
+
+  const text = await response.text();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  const data: unknown = JSON.parse(text);
+
+  if (data === null) {
+    return null;
+  }
+
+  if (
+    typeof data !== "object" ||
+    !("receiptId" in data) ||
+    typeof data.receiptId !== "number" ||
+    !Number.isInteger(data.receiptId) ||
+    !("body" in data) ||
+    typeof data.body !== "object" ||
+    data.body === null ||
+    Array.isArray(data.body)
+  ) {
+    throw new Error("GREEN-API returned an invalid notification envelope.");
+  }
+
+  return {
+    receiptId: data.receiptId,
+    body: data.body,
+  };
+}
 
 export const deleteNotification: (
-  credentials: Credentials,
+  credentials: GreenApiCredentials,
   request: DeleteNotificationRequest,
-) => Promise<unknown> = () => {
+) => Promise<DeleteNotificationResponse> = () => {
   return Promise.reject(
     new Error("GREEN-API deleteNotification is not implemented."),
   );

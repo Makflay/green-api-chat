@@ -14,7 +14,7 @@ export type SendMessageResponse = {
 };
 
 export type DeleteNotificationRequest = {
-  receiptId: string | number;
+  receiptId: number;
 };
 
 export type CheckAccountRequest = {
@@ -31,3 +31,33 @@ export type CheckAccountResponse =
       status: false;
       reason: string;
     };
+
+export type IncomingTextNotificationResponse = {
+  receiptId: number;
+  body: {
+    typeWebhook: "incomingMessageReceived";
+    timestamp: number;
+    idMessage: string;
+    senderData: {
+      chatId: string;
+      sender: string;
+      senderName: string;
+      senderPhoneNumber: number;
+    };
+    messageData: {
+      typeMessage: "textMessage";
+      textMessageData: {
+        textMessage: string;
+      };
+    };
+  };
+};
+
+export type DeleteNotificationResponse = {
+  result: boolean;
+};
+
+export type ReceiveNotificationResponse = {
+  receiptId: number;
+  body: unknown;
+};
