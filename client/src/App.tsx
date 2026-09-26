@@ -33,13 +33,43 @@ function App() {
     text: string;
   } | null>(null);
 
-  const lastNotificationRef = useRef<IncomingTextNotificationResponse | null>(
-    null,
-  );
-
   const handleNotification = useCallback(
     (notification: IncomingTextNotificationResponse) => {
-      lastNotificationRef.current = notification;
+      const { body } = notification;
+      const serverChatId = body.senderData.chatId;
+
+      const message: Message = {
+        id: body.idMessage,
+        text: body.messageData.textMessageData.textMessage,
+        direction: "incoming",
+      };
+
+      setChats((currentChats) => {
+        const targetChat = currentChats.find(
+          (chat) => chat.chatId === serverChatId,
+        );
+
+        if (!targetChat) {
+          return currentChats;
+        }
+
+        const alreadyExists = targetChat.messages.some(
+          (existingMessage) => existingMessage.id === message.id,
+        );
+
+        if (alreadyExists) {
+          return currentChats;
+        }
+
+        return currentChats.map((chat) =>
+          chat.id === targetChat.id
+            ? {
+                ...chat,
+                messages: [...chat.messages, message],
+              }
+            : chat,
+        );
+      });
     },
     [],
   );
