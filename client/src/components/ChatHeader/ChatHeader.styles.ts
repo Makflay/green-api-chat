@@ -16,6 +16,8 @@ export const HeaderInfo = styled(Box)({
   display: "flex",
   flexDirection: "column",
   minWidth: 0,
+  flex: 1,
+  gap: 2,
 });
 
 export const PhoneNumber = styled(Typography)(({ theme }) => ({

@@ -10,7 +10,10 @@ export const ListViewport = styled(Box)(({ theme }) => ({
   minHeight: 0,
   overflowY: "auto",
   scrollbarGutter: "stable",
-  padding: theme.spacing(3),
+  padding: theme.spacing(2, 3),
+  [theme.breakpoints.down("lg")]: {
+    padding: theme.spacing(2),
+  },
 }));
 
 export const Messages = styled("ul")(({ theme }) => ({
@@ -34,5 +37,5 @@ export const EmptyState = styled(Box)(({ theme }) => ({
 
 export const EmptyStateText = styled(Typography)(({ theme }) => ({
   ...theme.typography.body2,
-  color: theme.palette.text.secondary,
+  color: theme.palette.text.primary,
 }));

@@ -113,7 +113,7 @@ export function CredentialsForm({
             }
             disabled={loading}
             error={apiUrlError}
-            helperText={apiUrlError ? "Введите корректный apiUrl" : ""}
+            helperText={apiUrlError ? "Введите корректный apiUrl" : " "}
             required
             fullWidth
             autoComplete="off"
@@ -130,7 +130,9 @@ export function CredentialsForm({
               setTouched((current) => ({ ...current, idInstance: true }))
             }
             error={idInstanceError}
-            helperText={idInstanceError ? "Введите корректный idInstance." : ""}
+            helperText={
+              idInstanceError ? "Введите корректный idInstance." : " "
+            }
             required
             variant="outlined"
             fullWidth
@@ -158,7 +160,7 @@ export function CredentialsForm({
             helperText={
               apiTokenInstanceError
                 ? "Введите корректный apiTokenInstance."
-                : ""
+                : " "
             }
             required
             variant="outlined"

@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 
 export const InputPanel = styled(Box)(({ theme }) => ({
   flexShrink: 0,
-  padding: theme.spacing(1.5, 2),
+  padding: theme.spacing(1, 2),
   backgroundColor: theme.palette.background.paper,
   borderTop: `1px solid ${theme.palette.divider}`,
 }));
@@ -18,7 +18,7 @@ export const Composer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.75, 1, 0.75, 2),
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: `calc(${theme.shape.borderRadius} * 2)`,
+  borderRadius: 24,
 
   "&:focus-within": {
     borderColor: theme.palette.primary.main,

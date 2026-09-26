@@ -19,7 +19,7 @@ export const Card = styled("section")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
-  boxShadow: "0 8px 32px rgba(23, 25, 28, 0.04)",
+  boxShadow: "0 4px 20px rgba(23, 25, 28, 0.04)",
 
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(3),
@@ -54,6 +54,20 @@ export const Field = styled(TextField)(({ theme }) => ({
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },
+
+    "&.Mui-error .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.error.main,
+    },
+
+    "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.divider,
+    },
+  },
+
+  "& .MuiFormHelperText-root": {
+    minHeight: "3em",
+    lineHeight: 1.5,
+    overflowWrap: "anywhere",
   },
 }));
 

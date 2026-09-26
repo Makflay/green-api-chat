@@ -19,7 +19,7 @@ export const theme = createTheme({
     },
     divider: "#E7EAEE",
     action: {
-      hover: "rgba(0, 133, 255, 0.04)",
+      hover: "rgba(23, 25, 28, 0.04)",
       selected: "#E9F4FF",
     },
   },
@@ -35,7 +35,7 @@ export const theme = createTheme({
       lineHeight: 1.25,
     },
     h2: {
-      fontSize: "1.375rem",
+      fontSize: "1.25rem",
       fontWeight: 700,
       lineHeight: 1.3,
     },

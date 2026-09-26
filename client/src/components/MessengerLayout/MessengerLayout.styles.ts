@@ -9,4 +9,7 @@ export const LayoutRoot = styled(Box)(({ theme }) => ({
   height: "100dvh",
   overflow: "hidden",
   backgroundColor: theme.palette.background.default,
+  [theme.breakpoints.up("lg")]: {
+    gridTemplateColumns: "80px 400px minmax(0, 1fr)",
+  },
 }));

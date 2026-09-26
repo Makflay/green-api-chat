@@ -19,6 +19,7 @@ export const SidebarHeader = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   flexShrink: 0,
+  minHeight: 72,
   gap: theme.spacing(2),
   padding: theme.spacing(2),
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -51,6 +52,11 @@ export const NewChatButton = styled(IconButton)(({ theme }) => ({
   "& .MuiSvgIcon-root": {
     fontSize: 26,
   },
+
+  "&.Mui-disabled": {
+    backgroundColor: theme.palette.action.disabledBackground,
+    color: theme.palette.action.disabled,
+  },
 }));
 
 export const ChatsArea = styled(Box)({
@@ -80,6 +86,9 @@ export const ChatList = styled(List)(({ theme }) => ({
 }));
 
 export const ChatItem = styled(ListItemButton)(({ theme }) => ({
+  width: "100%",
+  minWidth: 0,
+  textAlign: "left",
   minHeight: 72,
   padding: theme.spacing(2),
   color: theme.palette.text.primary,
@@ -104,7 +113,9 @@ export const ChatItem = styled(ListItemButton)(({ theme }) => ({
 
 export const ChatNumber = styled(Typography)(({ theme }) => ({
   ...theme.typography.body1,
-  fontWeight: theme.typography.fontWeightMedium,
-  overflowWrap: "anywhere",
+  fontWeight: theme.typography.fontWeightBold,
   minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 })) as typeof Typography;

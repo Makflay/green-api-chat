@@ -38,6 +38,7 @@ export const NavigationList = styled(List)(({ theme }) => ({
   gap: theme.spacing(1),
   width: "100%",
   padding: 0,
+  flexShrink: 0,
 })) as typeof List;
 
 export const BottomList = styled(NavigationList)(({ theme }) => ({
@@ -49,6 +50,8 @@ export const RailItem = styled(ListItemButton)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
+  width: "100%",
+  flexShrink: 0,
   gap: theme.spacing(0.5),
   minHeight: 64,
   padding: theme.spacing(1, 0.5),
@@ -81,10 +84,19 @@ export const RailItem = styled(ListItemButton)(({ theme }) => ({
     outline: `2px solid ${theme.palette.primary.main}`,
     outlineOffset: -2,
   },
+
+  '&[aria-disabled="true"]': {
+    cursor: "default",
+  },
+
+  '&[aria-disabled="true"]:hover': {
+    backgroundColor: theme.palette.action.hover,
+    color: theme.palette.text.secondary,
+  },
 })) as typeof ListItemButton;
 
 export const ItemLabel = styled(Typography)({
-  fontSize: "0.6875rem",
+  fontSize: "0.75rem",
   lineHeight: 1.3,
   fontWeight: 400,
 }) as typeof Typography;

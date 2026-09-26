@@ -11,6 +11,12 @@ export const FormDialog = styled(Dialog)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     backgroundColor: theme.palette.background.paper,
     backgroundImage: "none",
+    marginTop: theme.spacing(6),
+    maxHeight: `calc(100dvh - ${theme.spacing(8)})`,
+  },
+
+  "& .MuiDialog-container": {
+    alignItems: "flex-start",
   },
 }));
 
@@ -27,6 +33,11 @@ export const FormTitle = styled(DialogTitle)(({ theme }) => ({
 
 export const FormContent = styled(DialogContent)(({ theme }) => ({
   padding: theme.spacing(1, 3, 2),
+  "& .MuiFormHelperText-root": {
+    minHeight: "4.5em",
+    lineHeight: 1.5,
+    overflowWrap: "anywhere",
+  },
 }));
 
 export const FormActions = styled(DialogActions)(({ theme }) => ({
