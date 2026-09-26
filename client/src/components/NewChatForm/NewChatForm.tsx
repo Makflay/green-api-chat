@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { FormEvent } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -12,12 +12,10 @@ import {
   CreateLabel,
   CreateProgress,
 } from "./NewChatForm.styles";
-import type { Chat } from "../../types/chat";
 
 type NewChatFormProps = {
-  onCreate: (chat: Chat) => void;
+  onCreate: (phone: string) => Promise<string | null>;
   onClose: () => void;
-  loading?: boolean;
 };
 
 function normalizePhoneNumber(value: string) {
@@ -43,36 +41,55 @@ function getPhoneError(value: string): string {
     return "Знак + допустим только один раз в начале номера.";
   }
 
+  const digits = normalized.replace(/^\+/, "");
+
+  if (!/^(7\d{10}|375\d{9})$/.test(digits)) {
+    return "Введите номер РФ или РБ с кодом страны 7 или 375.";
+  }
+
   return "";
 }
 
-export function NewChatForm({
-  onCreate,
-  onClose,
-  loading = false,
-}: NewChatFormProps) {
+export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [touched, setTouched] = useState(false);
 
-  const validationError = getPhoneError(phoneNumber);
-  const visibleError = touched ? validationError : "";
+  const [loading, setLoading] = useState(false);
+  const [requestError, setRequestError] = useState("");
+  const submittingRef = useRef(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const validationError = getPhoneError(phoneNumber);
+  const visibleError = (touched ? validationError : "") || requestError;
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (loading) {
+    if (submittingRef.current) {
       return;
     }
 
     setTouched(true);
+    setRequestError("");
 
     if (validationError) {
       return;
     }
 
-    const normalized = normalizePhoneNumber(phoneNumber);
+    submittingRef.current = true;
+    setLoading(true);
 
-    onCreate({ id: normalized, phone: normalized, messages: [] });
+    try {
+      const error = await onCreate(normalizePhoneNumber(phoneNumber));
+
+      if (error) {
+        setRequestError(error);
+      }
+    } catch {
+      setRequestError("Не удалось создать чат.");
+    } finally {
+      submittingRef.current = false;
+      setLoading(false);
+    }
   }
 
   return (
@@ -100,6 +117,7 @@ export function NewChatForm({
             value={phoneNumber}
             onChange={(event) => {
               setPhoneNumber(event.target.value);
+              setRequestError("");
             }}
             onBlur={() => setTouched(true)}
             disabled={loading}

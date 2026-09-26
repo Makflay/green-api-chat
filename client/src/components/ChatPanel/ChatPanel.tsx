@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import { PanelRoot, PanelContent, NoChatState } from "./ChatPanel.styles";
-import type { Chat } from "../../types/chat";
+import type { Chat } from "../../types/chat.type";
 
 import { ChatHeader } from "../ChatHeader/ChatHeader";
 import { MessageList } from "../MessageList/MessageList";
@@ -9,21 +10,31 @@ import { MessageInput } from "../MessageInput/MessageInput";
 
 type ChatPanelProps = {
   chat: Chat | null;
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string) => Promise<boolean>;
+  isSending: boolean;
+  sendError: string | null;
 };
 
-export function ChatPanel({ chat, onSendMessage }: ChatPanelProps) {
+export function ChatPanel({
+  chat,
+  onSendMessage,
+  isSending,
+  sendError,
+}: ChatPanelProps) {
   const [draft, setDraft] = useState("");
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const text = draft.trim();
 
-    if (!chat || !text) {
+    if (!chat || !text || isSending) {
       return;
     }
 
-    onSendMessage(text);
-    setDraft("");
+    const sent = await onSendMessage(text);
+
+    if (sent) {
+      setDraft("");
+    }
   }
 
   return (
@@ -33,10 +44,14 @@ export function ChatPanel({ chat, onSendMessage }: ChatPanelProps) {
           <>
             <ChatHeader chat={chat} />
             <MessageList key={chat.id} messages={chat.messages} />
+            {sendError && <Alert severity="error">{sendError}</Alert>}
             <MessageInput
               value={draft}
               onChange={setDraft}
-              onSubmit={handleSubmit}
+              onSubmit={() => {
+                void handleSubmit();
+              }}
+              loading={isSending}
             />
           </>
         ) : (

@@ -1,4 +1,4 @@
-import type { Chat } from "../../types/chat";
+import type { Chat } from "../../types/chat.type";
 import {
   HeaderInfo,
   HeaderRoot,

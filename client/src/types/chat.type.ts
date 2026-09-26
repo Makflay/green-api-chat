@@ -13,6 +13,7 @@ export type Message = {
 
 export type Chat = {
   id: string;
+  chatId: string;
   phone: string;
   messages: Message[];
 };

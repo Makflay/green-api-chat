@@ -14,12 +14,12 @@ import {
   ChatNumber,
 } from "./ChatsSidebar.styles";
 import { NewChatForm } from "../NewChatForm/NewChatForm";
-import type { Chat } from "../../types/chat";
+import type { Chat } from "../../types/chat.type";
 
 type ChatsSidebarProps = {
   chats: Chat[];
   activeChatId: string | null;
-  onCreateChat: (chat: Chat) => void;
+  onCreateChat: (phone: string) => Promise<string | null>;
   onSelectChat: (chatId: string) => void;
 };
 
@@ -31,9 +31,14 @@ export function ChatsSidebar({
 }: ChatsSidebarProps) {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
 
-  function handleCreateChat(chat: Chat) {
-    onCreateChat(chat);
-    setIsNewChatOpen(false);
+  async function handleCreateChat(phone: string): Promise<string | null> {
+    const error = await onCreateChat(phone);
+
+    if (!error) {
+      setIsNewChatOpen(false);
+    }
+
+    return error;
   }
 
   return (

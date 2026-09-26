@@ -1,5 +1,5 @@
 import { LayoutRoot } from "./MessengerLayout.styles";
-import type { Chat } from "../../types/chat";
+import type { Chat } from "../../types/chat.type";
 
 import { NavigationRail } from "../NavigationRail/NavigationRail";
 import { ChatsSidebar } from "../ChatsSidebar/ChatsSidebar";
@@ -9,9 +9,11 @@ type MessengerLayoutProps = {
   chats: Chat[];
   activeChatId: string | null;
   activeChat: Chat | null;
-  onCreateChat: (chat: Chat) => void;
+  onCreateChat: (phone: string) => Promise<string | null>;
   onSelectChat: (chatId: string) => void;
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string) => Promise<boolean>;
+  isSending: boolean;
+  sendError: string | null;
 };
 
 export function MessengerLayout({
@@ -21,6 +23,8 @@ export function MessengerLayout({
   onCreateChat,
   onSelectChat,
   onSendMessage,
+  isSending,
+  sendError,
 }: MessengerLayoutProps) {
   return (
     <LayoutRoot>
@@ -35,6 +39,8 @@ export function MessengerLayout({
         key={activeChat?.id ?? "no-active-chat"}
         chat={activeChat}
         onSendMessage={onSendMessage}
+        isSending={isSending}
+        sendError={sendError}
       />
     </LayoutRoot>
   );

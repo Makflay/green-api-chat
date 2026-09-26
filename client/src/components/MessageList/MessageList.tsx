@@ -1,4 +1,4 @@
-import type { Message } from "../../types/chat";
+import type { Message } from "../../types/chat.type";
 import { MessageBubble } from "../MessageBubble/MessageBubble";
 import {
   EmptyState,

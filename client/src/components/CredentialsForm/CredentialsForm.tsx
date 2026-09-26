@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Typography from "@mui/material/Typography";
 import type { FormEvent } from "react";
-import type { Credentials } from "../../types/chat";
+
 import {
   Card,
   ConnectButton,
@@ -13,10 +13,28 @@ import {
   ConnectProgress,
 } from "./CredentialsForm.styles";
 
+import type { GreenApiCredentials } from "../../types/greenApi.type";
+
 type CredentialsFormProps = {
-  onConnect: (credentials: Credentials) => void;
+  onConnect: (credentials: GreenApiCredentials) => void;
   loading?: boolean;
 };
+
+function isValidApiUrl(value: string): boolean {
+  try {
+    const url = new URL(value.trim());
+
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
 
 export function CredentialsForm({
   onConnect,
@@ -25,15 +43,21 @@ export function CredentialsForm({
   const [idInstance, setIdInstance] = useState("");
   const [apiTokenInstance, setApiTokenInstance] = useState("");
   const [touched, setTouched] = useState({
+    apiUrl: false,
     idInstance: false,
     apiTokenInstance: false,
   });
+  const [apiUrl, setApiUrl] = useState("");
+
+  const apiUrlError = touched.apiUrl && !isValidApiUrl(apiUrl);
 
   const idInstanceError = touched.idInstance && !idInstance.trim();
   const apiTokenInstanceError =
     touched.apiTokenInstance && !apiTokenInstance.trim();
   const canConnect =
-    Boolean(idInstance.trim()) && Boolean(apiTokenInstance.trim());
+    isValidApiUrl(apiUrl) &&
+    Boolean(idInstance.trim()) &&
+    Boolean(apiTokenInstance.trim());
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,6 +67,7 @@ export function CredentialsForm({
     }
 
     setTouched({
+      apiUrl: false,
       idInstance: true,
       apiTokenInstance: true,
     });
@@ -52,6 +77,7 @@ export function CredentialsForm({
     }
 
     onConnect({
+      apiUrl: apiUrl.trim().replace(/\/+$/, ""),
       idInstance: idInstance.trim(),
       apiTokenInstance: apiTokenInstance.trim(),
     });
@@ -66,7 +92,7 @@ export function CredentialsForm({
           </Typography>
 
           <Typography variant="body2" color="text.secondary">
-            Введите учетные данные вашего инстанса.
+            Введите учетные данные из кабинета GREEN-API.
           </Typography>
         </Header>
 
@@ -75,6 +101,24 @@ export function CredentialsForm({
           onSubmit={handleSubmit}
           noValidate
         >
+          <Field
+            id="apiUrl"
+            name="apiUrl"
+            label="API URL"
+            type="url"
+            value={apiUrl}
+            onChange={(event) => setApiUrl(event.target.value)}
+            onBlur={() =>
+              setTouched((current) => ({ ...current, apiUrl: true }))
+            }
+            disabled={loading}
+            error={apiUrlError}
+            helperText={apiUrlError ? "Введите корректный apiUrl" : ""}
+            required
+            fullWidth
+            autoComplete="off"
+          />
+
           <Field
             id="idInstance"
             name="idInstance"
@@ -86,7 +130,7 @@ export function CredentialsForm({
               setTouched((current) => ({ ...current, idInstance: true }))
             }
             error={idInstanceError}
-            helperText={idInstanceError ? "Введите idInstance." : ""}
+            helperText={idInstanceError ? "Введите корректный idInstance." : ""}
             required
             variant="outlined"
             fullWidth
@@ -112,7 +156,9 @@ export function CredentialsForm({
             }
             error={apiTokenInstanceError}
             helperText={
-              apiTokenInstanceError ? "Введите apiTokenInstance." : ""
+              apiTokenInstanceError
+                ? "Введите корректный apiTokenInstance."
+                : ""
             }
             required
             variant="outlined"
