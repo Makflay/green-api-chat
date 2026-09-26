@@ -13,28 +13,12 @@ import {
   ConnectProgress,
 } from "./CredentialsForm.styles";
 
-import type { GreenApiCredentials } from "../../types/greenApi.type";
+import type { Credentials } from "../../types/chat.type";
 
 type CredentialsFormProps = {
-  onConnect: (credentials: GreenApiCredentials) => void;
+  onConnect: (credentials: Credentials) => void;
   loading?: boolean;
 };
-
-function isValidApiUrl(value: string): boolean {
-  try {
-    const url = new URL(value.trim());
-
-    return (
-      url.protocol === "https:" &&
-      !url.username &&
-      !url.password &&
-      !url.search &&
-      !url.hash
-    );
-  } catch {
-    return false;
-  }
-}
 
 export function CredentialsForm({
   onConnect,
@@ -43,21 +27,15 @@ export function CredentialsForm({
   const [idInstance, setIdInstance] = useState("");
   const [apiTokenInstance, setApiTokenInstance] = useState("");
   const [touched, setTouched] = useState({
-    apiUrl: false,
     idInstance: false,
     apiTokenInstance: false,
   });
-  const [apiUrl, setApiUrl] = useState("");
-
-  const apiUrlError = touched.apiUrl && !isValidApiUrl(apiUrl);
 
   const idInstanceError = touched.idInstance && !idInstance.trim();
   const apiTokenInstanceError =
     touched.apiTokenInstance && !apiTokenInstance.trim();
   const canConnect =
-    isValidApiUrl(apiUrl) &&
-    Boolean(idInstance.trim()) &&
-    Boolean(apiTokenInstance.trim());
+    Boolean(idInstance.trim()) && Boolean(apiTokenInstance.trim());
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,7 +45,6 @@ export function CredentialsForm({
     }
 
     setTouched({
-      apiUrl: false,
       idInstance: true,
       apiTokenInstance: true,
     });
@@ -77,7 +54,6 @@ export function CredentialsForm({
     }
 
     onConnect({
-      apiUrl: apiUrl.trim().replace(/\/+$/, ""),
       idInstance: idInstance.trim(),
       apiTokenInstance: apiTokenInstance.trim(),
     });
@@ -101,24 +77,6 @@ export function CredentialsForm({
           onSubmit={handleSubmit}
           noValidate
         >
-          <Field
-            id="apiUrl"
-            name="apiUrl"
-            label="API URL"
-            type="url"
-            value={apiUrl}
-            onChange={(event) => setApiUrl(event.target.value)}
-            onBlur={() =>
-              setTouched((current) => ({ ...current, apiUrl: true }))
-            }
-            disabled={loading}
-            error={apiUrlError}
-            helperText={apiUrlError ? "Введите корректный apiUrl" : " "}
-            required
-            fullWidth
-            autoComplete="off"
-          />
-
           <Field
             id="idInstance"
             name="idInstance"

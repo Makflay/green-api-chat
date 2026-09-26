@@ -5,11 +5,8 @@ import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
 import { MessengerLayout } from "./components/MessengerLayout/MessengerLayout";
 
 import * as greenApi from "./api/greenApi";
-import type { Chat, Message } from "./types/chat.type";
-import type {
-  GreenApiCredentials,
-  IncomingTextNotificationResponse,
-} from "./types/greenApi.type";
+import type { Chat, Message, Credentials } from "./types/chat.type";
+import type { IncomingTextNotificationResponse } from "./types/greenApi.type";
 
 import {
   getPhoneError,
@@ -19,9 +16,7 @@ import {
 import { useNotifications } from "./hooks/useNotifications";
 
 function App() {
-  const [credentials, setCredentials] = useState<GreenApiCredentials | null>(
-    null,
-  );
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 

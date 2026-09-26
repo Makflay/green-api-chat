@@ -1,9 +1,3 @@
-import type { Credentials } from "./chat.type";
-
-export type GreenApiCredentials = Credentials & {
-  apiUrl: string;
-};
-
 export type SendMessageRequest = {
   chatId: string;
   message: string;

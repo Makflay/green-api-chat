@@ -1,13 +1,15 @@
 import type {
   DeleteNotificationRequest,
   SendMessageRequest,
-  GreenApiCredentials,
   SendMessageResponse,
   CheckAccountRequest,
   CheckAccountResponse,
   DeleteNotificationResponse,
   ReceiveNotificationResponse,
 } from "../types/greenApi.type";
+import type { Credentials } from "../types/chat.type";
+
+const GREEN_API_BASE_URL = "https://api.green-api.com";
 
 export class GreenApiHttpError extends Error {
   readonly status: number;
@@ -27,14 +29,13 @@ export function isGreenApiAuthError(error: unknown): boolean {
 }
 
 export async function sendMessage(
-  credentials: GreenApiCredentials,
+  credentials: Credentials,
   payload: SendMessageRequest,
 ): Promise<SendMessageResponse> {
-  const { apiUrl, idInstance, apiTokenInstance } = credentials;
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const { idInstance, apiTokenInstance } = credentials;
 
   const response = await fetch(
-    `${baseUrl}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`,
+    `${GREEN_API_BASE_URL}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`,
     {
       method: "POST",
       headers: {
@@ -66,14 +67,13 @@ export async function sendMessage(
 }
 
 export async function checkAccount(
-  credentials: GreenApiCredentials,
+  credentials: Credentials,
   payload: CheckAccountRequest,
 ): Promise<CheckAccountResponse> {
-  const { apiUrl, idInstance, apiTokenInstance } = credentials;
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const { idInstance, apiTokenInstance } = credentials;
 
   const response = await fetch(
-    `${baseUrl}/waInstance${idInstance}/checkAccount/${apiTokenInstance}`,
+    `${GREEN_API_BASE_URL}/waInstance${idInstance}/checkAccount/${apiTokenInstance}`,
     {
       method: "POST",
       headers: {
@@ -91,14 +91,13 @@ export async function checkAccount(
 }
 
 export async function receiveNotification(
-  credentials: GreenApiCredentials,
+  credentials: Credentials,
   signal?: AbortSignal,
 ): Promise<ReceiveNotificationResponse | null> {
-  const { apiUrl, idInstance, apiTokenInstance } = credentials;
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const { idInstance, apiTokenInstance } = credentials;
 
   const response = await fetch(
-    `${baseUrl}/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`,
+    `${GREEN_API_BASE_URL}/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`,
     {
       method: "GET",
       signal,
@@ -141,15 +140,14 @@ export async function receiveNotification(
 }
 
 export async function deleteNotification(
-  credentials: GreenApiCredentials,
+  credentials: Credentials,
   request: DeleteNotificationRequest,
   signal?: AbortSignal,
 ): Promise<DeleteNotificationResponse> {
-  const { apiUrl, idInstance, apiTokenInstance } = credentials;
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const { idInstance, apiTokenInstance } = credentials;
 
   const response = await fetch(
-    `${baseUrl}/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${request.receiptId}`,
+    `${GREEN_API_BASE_URL}/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${request.receiptId}`,
     {
       method: "DELETE",
       signal,

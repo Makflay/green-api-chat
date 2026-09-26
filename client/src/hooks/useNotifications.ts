@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 
 import * as greenApi from "../api/greenApi";
-import type {
-  GreenApiCredentials,
-  IncomingTextNotificationResponse,
-} from "../types/greenApi.type";
+import type { IncomingTextNotificationResponse } from "../types/greenApi.type";
+import type { Credentials } from "../types/chat.type";
+
 import {
   isIncomingTextNotification,
   isUnsupportedNotification,
@@ -13,31 +12,14 @@ import {
 const POLLING_DELAY_MS = 3000;
 
 function hasValidCredentialFormat(
-  apiUrl: string,
   idInstance: string,
   apiTokenInstance: string,
 ): boolean {
-  if (!/^\d+$/.test(idInstance) || !apiTokenInstance) {
-    return false;
-  }
-
-  try {
-    const url = new URL(apiUrl);
-
-    return (
-      url.protocol === "https:" &&
-      !url.username &&
-      !url.password &&
-      !url.search &&
-      !url.hash
-    );
-  } catch {
-    return false;
-  }
+  return /^\d+$/.test(idInstance) && Boolean(apiTokenInstance);
 }
 
 export function useNotifications(
-  credentials: GreenApiCredentials | null,
+  credentials: Credentials | null,
   onNotification: (
     notification: IncomingTextNotificationResponse,
   ) => Promise<boolean>,
@@ -50,17 +32,15 @@ export function useNotifications(
     callbackRef.current = onNotification;
   }, [onNotification]);
 
-  const apiUrl = credentials?.apiUrl.trim().replace(/\/+$/, "") ?? "";
   const idInstance = credentials?.idInstance.trim() ?? "";
   const apiTokenInstance = credentials?.apiTokenInstance.trim() ?? "";
 
   useEffect(() => {
-    if (!hasValidCredentialFormat(apiUrl, idInstance, apiTokenInstance)) {
+    if (!hasValidCredentialFormat(idInstance, apiTokenInstance)) {
       return;
     }
 
-    const currentCredentials: GreenApiCredentials = {
-      apiUrl,
+    const currentCredentials: Credentials = {
       idInstance,
       apiTokenInstance,
     };
@@ -196,6 +176,6 @@ export function useNotifications(
 
       controller.abort();
     };
-  }, [apiUrl, idInstance, apiTokenInstance]);
+  }, [idInstance, apiTokenInstance]);
   return pollingError;
 }

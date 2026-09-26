@@ -3,7 +3,7 @@ import {
   GreenApiHttpError,
   isGreenApiAuthError,
 } from "../api/greenApi";
-import type { GreenApiCredentials } from "../types/greenApi.type";
+import type { Credentials } from "../types/chat.type";
 
 export function normalizePhoneNumber(value: string): string {
   return value.replace(/[\s().\-–—]/g, "");
@@ -25,7 +25,7 @@ export function getPhoneError(value: string): string {
 
 export async function resolveMaxChatId(
   normalizedPhone: string,
-  credentials: GreenApiCredentials,
+  credentials: Credentials,
 ): Promise<string> {
   const phoneError = getPhoneError(normalizedPhone);
 
