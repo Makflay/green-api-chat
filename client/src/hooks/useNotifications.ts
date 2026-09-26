@@ -3,14 +3,15 @@ import { useEffect, useRef } from "react";
 import * as greenApi from "../api/greenApi";
 import type {
   GreenApiCredentials,
-  ReceiveNotificationResponse,
+  IncomingTextNotificationResponse,
 } from "../types/greenApi.type";
+import { isIncomingTextNotification } from "../utils/isIncomingTextNotification";
 
 const POLLING_DELAY_MS = 3000;
 
 export function useNotifications(
   credentials: GreenApiCredentials | null,
-  onNotification: (notification: ReceiveNotificationResponse) => void,
+  onNotification: (notification: IncomingTextNotificationResponse) => void,
 ): void {
   const callbackRef = useRef(onNotification);
   const requestInFlightRef = useRef(false);
@@ -61,7 +62,11 @@ export function useNotifications(
         const notification =
           await greenApi.receiveNotification(currentCredentials);
 
-        if (!stopped && notification !== null) {
+        if (
+          !stopped &&
+          notification !== null &&
+          isIncomingTextNotification(notification)
+        ) {
           callbackRef.current(notification);
         }
       } catch {

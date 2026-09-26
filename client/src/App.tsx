@@ -8,7 +8,7 @@ import * as greenApi from "./api/greenApi";
 import type { Chat, Message } from "./types/chat.type";
 import type {
   GreenApiCredentials,
-  ReceiveNotificationResponse,
+  IncomingTextNotificationResponse,
 } from "./types/greenApi.type";
 
 import {
@@ -33,10 +33,12 @@ function App() {
     text: string;
   } | null>(null);
 
-  const lastNotificationRef = useRef<ReceiveNotificationResponse | null>(null);
+  const lastNotificationRef = useRef<IncomingTextNotificationResponse | null>(
+    null,
+  );
 
   const handleNotification = useCallback(
-    (notification: ReceiveNotificationResponse) => {
+    (notification: IncomingTextNotificationResponse) => {
       lastNotificationRef.current = notification;
     },
     [],
