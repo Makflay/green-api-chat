@@ -65,6 +65,7 @@ export async function checkAccount(
 
 export async function receiveNotification(
   credentials: GreenApiCredentials,
+  signal?: AbortSignal,
 ): Promise<ReceiveNotificationResponse | null> {
   const { apiUrl, idInstance, apiTokenInstance } = credentials;
   const baseUrl = apiUrl.replace(/\/+$/, "");
@@ -73,6 +74,7 @@ export async function receiveNotification(
     `${baseUrl}/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`,
     {
       method: "GET",
+      signal,
     },
   );
 
@@ -116,6 +118,7 @@ export async function receiveNotification(
 export async function deleteNotification(
   credentials: GreenApiCredentials,
   request: DeleteNotificationRequest,
+  signal?: AbortSignal,
 ): Promise<DeleteNotificationResponse> {
   const { apiUrl, idInstance, apiTokenInstance } = credentials;
   const baseUrl = apiUrl.replace(/\/+$/, "");
@@ -124,6 +127,7 @@ export async function deleteNotification(
     `${baseUrl}/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${request.receiptId}`,
     {
       method: "DELETE",
+      signal,
     },
   );
 

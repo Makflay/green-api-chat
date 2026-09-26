@@ -12,6 +12,30 @@ import {
 
 const POLLING_DELAY_MS = 3000;
 
+function hasValidCredentialFormat(
+  apiUrl: string,
+  idInstance: string,
+  apiTokenInstance: string,
+): boolean {
+  if (!/^\d+$/.test(idInstance) || !apiTokenInstance) {
+    return false;
+  }
+
+  try {
+    const url = new URL(apiUrl);
+
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function useNotifications(
   credentials: GreenApiCredentials | null,
   onNotification: (
@@ -19,18 +43,18 @@ export function useNotifications(
   ) => Promise<boolean>,
 ): void {
   const callbackRef = useRef(onNotification);
-  const requestInFlightRef = useRef(false);
+  const cycleInFlightRef = useRef(false);
 
   useEffect(() => {
     callbackRef.current = onNotification;
   }, [onNotification]);
 
-  const apiUrl = credentials?.apiUrl;
-  const idInstance = credentials?.idInstance;
-  const apiTokenInstance = credentials?.apiTokenInstance;
+  const apiUrl = credentials?.apiUrl.trim().replace(/\/+$/, "") ?? "";
+  const idInstance = credentials?.idInstance.trim() ?? "";
+  const apiTokenInstance = credentials?.apiTokenInstance.trim() ?? "";
 
   useEffect(() => {
-    if (!apiUrl || !idInstance || !apiTokenInstance) {
+    if (!hasValidCredentialFormat(apiUrl, idInstance, apiTokenInstance)) {
       return;
     }
 
@@ -40,15 +64,24 @@ export function useNotifications(
       apiTokenInstance,
     };
 
+    const controller = new AbortController();
+
     let stopped = false;
     let timerId: ReturnType<typeof setTimeout> | undefined;
 
-    function scheduleNext() {
-      if (!stopped) {
-        timerId = setTimeout(() => {
-          void poll();
-        }, POLLING_DELAY_MS);
+    function scheduleNext(delay = POLLING_DELAY_MS) {
+      if (stopped) {
+        return;
       }
+
+      if (timerId !== undefined) {
+        clearTimeout(timerId);
+      }
+
+      timerId = setTimeout(() => {
+        timerId = undefined;
+        void poll();
+      }, delay);
     }
 
     async function poll(): Promise<void> {
@@ -56,16 +89,19 @@ export function useNotifications(
         return;
       }
 
-      if (requestInFlightRef.current) {
+      // Предыдущий экземпляр эффекта может ещё завершать отменённый цикл.
+      if (cycleInFlightRef.current) {
         scheduleNext();
         return;
       }
 
-      requestInFlightRef.current = true;
+      cycleInFlightRef.current = true;
 
       try {
-        const notification =
-          await greenApi.receiveNotification(currentCredentials);
+        const notification = await greenApi.receiveNotification(
+          currentCredentials,
+          controller.signal,
+        );
 
         if (stopped || notification === null) {
           return;
@@ -77,7 +113,7 @@ export function useNotifications(
           try {
             canDelete = await callbackRef.current(notification);
           } catch {
-            // Ошибка обработки: уведомление остаётся в очереди.
+            // Обработка не подтверждена — уведомление не удаляем.
             return;
           }
         } else {
@@ -89,36 +125,41 @@ export function useNotifications(
         }
 
         try {
-          const result = await greenApi.deleteNotification(currentCredentials, {
-            receiptId: notification.receiptId,
-          });
+          const result = await greenApi.deleteNotification(
+            currentCredentials,
+            {
+              receiptId: notification.receiptId,
+            },
+            controller.signal,
+          );
 
-          if (!result.result) {
-            // Удаление не подтверждено. Продолжим обычный polling.
+          if (stopped || !result.result) {
             return;
           }
         } catch {
-          // Сохранённое сообщение остаётся в state.
-          // Дополнительный запрос или отдельный retry не запускаем.
+          // Локально сохранённое сообщение остаётся в state.
+          // Повторная попытка возможна в следующем обычном цикле.
         }
       } catch {
-        // Ошибка получения: следующий цикл с обычной задержкой.
+        // Ошибка получения или отмена запроса.
+        // Cleanup запрещает запуск следующего цикла после остановки.
       } finally {
-        requestInFlightRef.current = false;
+        cycleInFlightRef.current = false;
         scheduleNext();
       }
     }
 
-    timerId = setTimeout(() => {
-      void poll();
-    }, 0);
+    scheduleNext(0);
 
     return () => {
       stopped = true;
 
       if (timerId !== undefined) {
         clearTimeout(timerId);
+        timerId = undefined;
       }
+
+      controller.abort();
     };
   }, [apiUrl, idInstance, apiTokenInstance]);
 }
