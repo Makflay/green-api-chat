@@ -14,6 +14,7 @@ type MessengerLayoutProps = {
   onSendMessage: (text: string) => Promise<boolean>;
   isSending: boolean;
   sendError: string | null;
+  pollingError: string | null;
 };
 
 export function MessengerLayout({
@@ -25,6 +26,7 @@ export function MessengerLayout({
   onSendMessage,
   isSending,
   sendError,
+  pollingError,
 }: MessengerLayoutProps) {
   return (
     <LayoutRoot>
@@ -41,6 +43,7 @@ export function MessengerLayout({
         onSendMessage={onSendMessage}
         isSending={isSending}
         sendError={sendError}
+        pollingError={pollingError}
       />
     </LayoutRoot>
   );

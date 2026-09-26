@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import * as greenApi from "../api/greenApi";
 import type {
@@ -41,7 +41,8 @@ export function useNotifications(
   onNotification: (
     notification: IncomingTextNotificationResponse,
   ) => Promise<boolean>,
-): void {
+): string | null {
+  const [pollingError, setPollingError] = useState<string | null>(null);
   const callbackRef = useRef(onNotification);
   const cycleInFlightRef = useRef(false);
 
@@ -69,6 +70,24 @@ export function useNotifications(
     let stopped = false;
     let timerId: ReturnType<typeof setTimeout> | undefined;
 
+    function reportPollingError(error: unknown, fallback: string) {
+      if (stopped) {
+        return;
+      }
+
+      if (greenApi.isGreenApiAuthError(error)) {
+        setPollingError(
+          "GREEN-API отклонил доступ. Получение сообщений остановлено. Проверьте учетные данные и права инстанса; для повторного ввода обновите страницу.",
+        );
+
+        stopped = true;
+        controller.abort();
+        return;
+      }
+
+      setPollingError(fallback);
+    }
+
     function scheduleNext(delay = POLLING_DELAY_MS) {
       if (stopped) {
         return;
@@ -89,7 +108,6 @@ export function useNotifications(
         return;
       }
 
-      // Предыдущий экземпляр эффекта может ещё завершать отменённый цикл.
       if (cycleInFlightRef.current) {
         scheduleNext();
         return;
@@ -103,7 +121,12 @@ export function useNotifications(
           controller.signal,
         );
 
-        if (stopped || notification === null) {
+        if (stopped) {
+          return;
+        }
+
+        if (notification === null) {
+          setPollingError(null);
           return;
         }
 
@@ -113,7 +136,6 @@ export function useNotifications(
           try {
             canDelete = await callbackRef.current(notification);
           } catch {
-            // Обработка не подтверждена — уведомление не удаляем.
             return;
           }
         } else {
@@ -133,16 +155,29 @@ export function useNotifications(
             controller.signal,
           );
 
-          if (stopped || !result.result) {
+          if (stopped) {
             return;
           }
-        } catch {
-          // Локально сохранённое сообщение остаётся в state.
-          // Повторная попытка возможна в следующем обычном цикле.
+
+          if (!result.result) {
+            setPollingError(
+              "Не удалось подтвердить обработку уведомления. Проверка продолжится автоматически.",
+            );
+            return;
+          }
+
+          setPollingError(null);
+        } catch (error) {
+          reportPollingError(
+            error,
+            "Не удалось подтвердить обработку уведомления. Уже сохранённые сообщения остаются в чате; проверка продолжится автоматически.",
+          );
         }
-      } catch {
-        // Ошибка получения или отмена запроса.
-        // Cleanup запрещает запуск следующего цикла после остановки.
+      } catch (error) {
+        reportPollingError(
+          error,
+          "Не удалось получить уведомления. Следующая попытка будет выполнена автоматически.",
+        );
       } finally {
         cycleInFlightRef.current = false;
         scheduleNext();
@@ -162,4 +197,5 @@ export function useNotifications(
       controller.abort();
     };
   }, [apiUrl, idInstance, apiTokenInstance]);
+  return pollingError;
 }

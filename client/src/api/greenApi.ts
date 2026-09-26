@@ -9,6 +9,23 @@ import type {
   ReceiveNotificationResponse,
 } from "../types/greenApi.type";
 
+export class GreenApiHttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`GREEN-API request failed with status ${status}`);
+    this.name = "GreenApiHttpError";
+    this.status = status;
+  }
+}
+
+export function isGreenApiAuthError(error: unknown): boolean {
+  return (
+    error instanceof GreenApiHttpError &&
+    (error.status === 401 || error.status === 403)
+  );
+}
+
 export async function sendMessage(
   credentials: GreenApiCredentials,
   payload: SendMessageRequest,
@@ -28,12 +45,24 @@ export async function sendMessage(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `GREEN-API SendMessage failed with status ${response.status}`,
-    );
+    throw new GreenApiHttpError(response.status);
   }
 
-  return response.json() as Promise<SendMessageResponse>;
+  const data: unknown = await response.json();
+
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    !("idMessage" in data) ||
+    typeof data.idMessage !== "string" ||
+    !data.idMessage.trim()
+  ) {
+    throw new Error("GREEN-API returned an invalid SendMessage response.");
+  }
+
+  return {
+    idMessage: data.idMessage,
+  };
 }
 
 export async function checkAccount(
@@ -55,9 +84,7 @@ export async function checkAccount(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `GREEN-API CheckAccount failed with status ${response.status}`,
-    );
+    throw new GreenApiHttpError(response.status);
   }
 
   return response.json() as Promise<CheckAccountResponse>;
@@ -79,9 +106,7 @@ export async function receiveNotification(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `GREEN-API ReceiveNotification failed with status ${response.status}`,
-    );
+    throw new GreenApiHttpError(response.status);
   }
 
   const text = await response.text();
@@ -132,9 +157,7 @@ export async function deleteNotification(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `GREEN-API DeleteNotification failed with status ${response.status}`,
-    );
+    throw new GreenApiHttpError(response.status);
   }
 
   return response.json() as Promise<DeleteNotificationResponse>;

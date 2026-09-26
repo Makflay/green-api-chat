@@ -117,7 +117,7 @@ function App() {
     [chats],
   );
 
-  useNotifications(credentials, handleNotification);
+  const pollingError = useNotifications(credentials, handleNotification);
 
   const activeChat = chats.find((chat) => chat.id === activeChatId) ?? null;
 
@@ -217,10 +217,23 @@ function App() {
       setSendError(null);
 
       return true;
-    } catch {
+    } catch (error) {
+      let text =
+        "Не удалось подтвердить отправку. Текст сохранён. Проверьте соединение и попробуйте ещё раз.";
+
+      if (greenApi.isGreenApiAuthError(error)) {
+        text =
+          "GREEN-API отклонил доступ. Проверьте учетные данные и права инстанса. Текст сохранён. Для повторного ввода credentials обновите страницу.";
+      } else if (
+        error instanceof greenApi.GreenApiHttpError &&
+        error.status === 400
+      ) {
+        text =
+          "GREEN-API отклонил запрос отправки. Проверьте получателя и параметры сообщения. Текст сохранён.";
+      }
       setSendError({
         localChatId: targetChat.id,
-        text: "Не удалось подтвердить отправку. Текст не очищен. Проверьте соединение и попробуйте отправить сообщение ещё раз.",
+        text,
       });
 
       return false;
@@ -246,6 +259,7 @@ function App() {
       sendError={
         sendError?.localChatId === activeChatId ? sendError.text : null
       }
+      pollingError={pollingError}
     />
   );
 }

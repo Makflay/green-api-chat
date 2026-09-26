@@ -1,4 +1,8 @@
-import { checkAccount } from "../api/greenApi";
+import {
+  checkAccount,
+  GreenApiHttpError,
+  isGreenApiAuthError,
+} from "../api/greenApi";
 import type { GreenApiCredentials } from "../types/greenApi.type";
 
 export function normalizePhoneNumber(value: string): string {
@@ -37,9 +41,24 @@ export async function resolveMaxChatId(
     account = await checkAccount(credentials, {
       phoneNumber: Number(digits),
     });
-  } catch {
+  } catch (error) {
+    if (isGreenApiAuthError(error)) {
+      throw new Error(
+        "GREEN-API отклонил доступ. Проверьте API URL, idInstance, токен и права инстанса. Для повторного ввода обновите страницу.",
+        { cause: error },
+      );
+    }
+
+    if (error instanceof GreenApiHttpError && error.status === 400) {
+      throw new Error(
+        "GREEN-API отклонил запрос проверки номера. Проверьте номер с кодом страны и параметры инстанса.",
+        { cause: error },
+      );
+    }
+
     throw new Error(
-      "Не удалось проверить номер. Проверьте соединение и учетные данные.",
+      "Не удалось проверить номер. Проверьте соединение и попробуйте ещё раз.",
+      { cause: error },
     );
   }
 

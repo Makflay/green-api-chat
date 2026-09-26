@@ -13,6 +13,7 @@ type ChatPanelProps = {
   onSendMessage: (text: string) => Promise<boolean>;
   isSending: boolean;
   sendError: string | null;
+  pollingError: string | null;
 };
 
 export function ChatPanel({
@@ -20,6 +21,7 @@ export function ChatPanel({
   onSendMessage,
   isSending,
   sendError,
+  pollingError,
 }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
 
@@ -39,6 +41,7 @@ export function ChatPanel({
 
   return (
     <PanelRoot component="main" aria-label="Область чата">
+      {pollingError && <Alert severity="warning">{pollingError}</Alert>}
       <>
         {chat ? (
           <>
