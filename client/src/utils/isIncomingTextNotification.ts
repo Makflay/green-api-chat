@@ -50,3 +50,25 @@ export function isIncomingTextNotification(
     isRecord(textMessageData) && typeof textMessageData.textMessage === "string"
   );
 }
+
+export function isUnsupportedNotification(
+  notification: ReceiveNotificationResponse,
+): boolean {
+  const { body } = notification;
+
+  if (!isRecord(body) || typeof body.typeWebhook !== "string") {
+    return false;
+  }
+
+  if (body.typeWebhook !== "incomingMessageReceived") {
+    return true;
+  }
+
+  const messageData = body.messageData;
+
+  return (
+    isRecord(messageData) &&
+    typeof messageData.typeMessage === "string" &&
+    messageData.typeMessage !== "textMessage"
+  );
+}

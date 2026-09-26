@@ -5,13 +5,18 @@ import type {
   GreenApiCredentials,
   IncomingTextNotificationResponse,
 } from "../types/greenApi.type";
-import { isIncomingTextNotification } from "../utils/isIncomingTextNotification";
+import {
+  isIncomingTextNotification,
+  isUnsupportedNotification,
+} from "../utils/isIncomingTextNotification";
 
 const POLLING_DELAY_MS = 3000;
 
 export function useNotifications(
   credentials: GreenApiCredentials | null,
-  onNotification: (notification: IncomingTextNotificationResponse) => void,
+  onNotification: (
+    notification: IncomingTextNotificationResponse,
+  ) => Promise<boolean>,
 ): void {
   const callbackRef = useRef(onNotification);
   const requestInFlightRef = useRef(false);
@@ -62,15 +67,42 @@ export function useNotifications(
         const notification =
           await greenApi.receiveNotification(currentCredentials);
 
-        if (
-          !stopped &&
-          notification !== null &&
-          isIncomingTextNotification(notification)
-        ) {
-          callbackRef.current(notification);
+        if (stopped || notification === null) {
+          return;
+        }
+
+        let canDelete = false;
+
+        if (isIncomingTextNotification(notification)) {
+          try {
+            canDelete = await callbackRef.current(notification);
+          } catch {
+            // Ошибка обработки: уведомление остаётся в очереди.
+            return;
+          }
+        } else {
+          canDelete = isUnsupportedNotification(notification);
+        }
+
+        if (stopped || !canDelete) {
+          return;
+        }
+
+        try {
+          const result = await greenApi.deleteNotification(currentCredentials, {
+            receiptId: notification.receiptId,
+          });
+
+          if (!result.result) {
+            // Удаление не подтверждено. Продолжим обычный polling.
+            return;
+          }
+        } catch {
+          // Сохранённое сообщение остаётся в state.
+          // Дополнительный запрос или отдельный retry не запускаем.
         }
       } catch {
-        // Ошибка не останавливает цикл, следующий запрос с обычной задержкой.
+        // Ошибка получения: следующий цикл с обычной задержкой.
       } finally {
         requestInFlightRef.current = false;
         scheduleNext();

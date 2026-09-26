@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./App.css";
 
 import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
@@ -33,10 +33,56 @@ function App() {
     text: string;
   } | null>(null);
 
+  const pendingNotificationRef = useRef<{
+    chatId: string;
+    messageId: string;
+    resolve: (processed: boolean) => void;
+  } | null>(null);
+
+  useEffect(() => {
+    const pending = pendingNotificationRef.current;
+
+    if (!pending) {
+      return;
+    }
+
+    const saved = chats.some(
+      (chat) =>
+        chat.chatId === pending.chatId &&
+        chat.messages.some((message) => message.id === pending.messageId),
+    );
+
+    pendingNotificationRef.current = null;
+    pending.resolve(saved);
+  }, [chats]);
+
+  useEffect(() => {
+    return () => {
+      const pending = pendingNotificationRef.current;
+
+      pendingNotificationRef.current = null;
+      pending?.resolve(false);
+    };
+  }, []);
+
   const handleNotification = useCallback(
-    (notification: IncomingTextNotificationResponse) => {
+    (notification: IncomingTextNotificationResponse): Promise<boolean> => {
       const { body } = notification;
       const serverChatId = body.senderData.chatId;
+
+      const targetChat = chats.find((chat) => chat.chatId === serverChatId);
+
+      if (!targetChat || pendingNotificationRef.current) {
+        return Promise.resolve(false);
+      }
+
+      const alreadySaved = targetChat.messages.some(
+        (message) => message.id === body.idMessage,
+      );
+
+      if (alreadySaved) {
+        return Promise.resolve(true);
+      }
 
       const message: Message = {
         id: body.idMessage,
@@ -44,34 +90,31 @@ function App() {
         direction: "incoming",
       };
 
-      setChats((currentChats) => {
-        const targetChat = currentChats.find(
-          (chat) => chat.chatId === serverChatId,
-        );
+      return new Promise<boolean>((resolve) => {
+        pendingNotificationRef.current = {
+          chatId: serverChatId,
+          messageId: message.id,
+          resolve,
+        };
 
-        if (!targetChat) {
-          return currentChats;
-        }
+        setChats((currentChats) =>
+          currentChats.map((chat) => {
+            if (
+              chat.chatId !== serverChatId ||
+              chat.messages.some((item) => item.id === message.id)
+            ) {
+              return chat;
+            }
 
-        const alreadyExists = targetChat.messages.some(
-          (existingMessage) => existingMessage.id === message.id,
-        );
-
-        if (alreadyExists) {
-          return currentChats;
-        }
-
-        return currentChats.map((chat) =>
-          chat.id === targetChat.id
-            ? {
-                ...chat,
-                messages: [...chat.messages, message],
-              }
-            : chat,
+            return {
+              ...chat,
+              messages: [...chat.messages, message],
+            };
+          }),
         );
       });
     },
-    [],
+    [chats],
   );
 
   useNotifications(credentials, handleNotification);

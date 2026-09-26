@@ -113,11 +113,25 @@ export async function receiveNotification(
   };
 }
 
-export const deleteNotification: (
+export async function deleteNotification(
   credentials: GreenApiCredentials,
   request: DeleteNotificationRequest,
-) => Promise<DeleteNotificationResponse> = () => {
-  return Promise.reject(
-    new Error("GREEN-API deleteNotification is not implemented."),
+): Promise<DeleteNotificationResponse> {
+  const { apiUrl, idInstance, apiTokenInstance } = credentials;
+  const baseUrl = apiUrl.replace(/\/+$/, "");
+
+  const response = await fetch(
+    `${baseUrl}/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${request.receiptId}`,
+    {
+      method: "DELETE",
+    },
   );
-};
+
+  if (!response.ok) {
+    throw new Error(
+      `GREEN-API DeleteNotification failed with status ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<DeleteNotificationResponse>;
+}
