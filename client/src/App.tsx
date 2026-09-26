@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-//import "./App.css";
 
 import { CredentialsForm } from "./components/CredentialsForm/CredentialsForm";
 import { MessengerLayout } from "./components/MessengerLayout/MessengerLayout";
