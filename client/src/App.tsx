@@ -8,6 +8,12 @@ import * as greenApi from "./api/greenApi";
 import type { Chat, Message } from "./types/chat.type";
 import type { GreenApiCredentials } from "./types/greenApi.type";
 
+import {
+  getPhoneError,
+  normalizePhoneNumber,
+  resolveMaxChatId,
+} from "./utils/chatId";
+
 function App() {
   const [credentials, setCredentials] = useState<GreenApiCredentials | null>(
     null,
@@ -30,63 +36,52 @@ function App() {
       return "Сначала введите учетные данные.";
     }
 
-    const digits = phone.replace(/^\+/, "");
+    const phoneError = getPhoneError(phone);
 
-    if (!/^(7\d{10}|375\d{9})$/.test(digits)) {
-      return "Введите номер РФ или РБ с кодом страны 7 или 375.";
+    if (phoneError) {
+      return phoneError;
     }
 
+    const digits = normalizePhoneNumber(phone).replace(/^\+/, "");
     const normalizedPhone = `+${digits}`;
 
-    const existingChat = chats.find(
-      (chat) => chat.phone.replace(/^\+/, "") === digits,
-    );
+    const existingChat = chats.find((chat) => chat.phone === normalizedPhone);
 
     if (existingChat) {
       setActiveChatId(existingChat.id);
       return null;
     }
 
+    let serverChatId: string;
+
     try {
-      const account = await greenApi.checkAccount(credentials, {
-        phoneNumber: Number(digits),
-      });
-
-      if ("status" in account) {
-        return "Не удалось проверить номер. Проверьте авторизацию инстанса и ограничения API.";
-      }
-
-      if (!account.exist) {
-        return "Аккаунт MAX для этого номера не найден.";
-      }
-
-      if (!account.chatId) {
-        return "GREEN-API не вернул идентификатор чата.";
-      }
-
-      const existingByServerId = chats.find(
-        (chat) => chat.chatId === account.chatId,
-      );
-
-      if (existingByServerId) {
-        setActiveChatId(existingByServerId.id);
-        return null;
-      }
-
-      const chat: Chat = {
-        id: crypto.randomUUID(),
-        chatId: account.chatId,
-        phone: normalizedPhone,
-        messages: [],
-      };
-
-      setChats((currentChats) => [...currentChats, chat]);
-      setActiveChatId(chat.id);
-
-      return null;
-    } catch {
-      return "Не удалось проверить номер. Проверьте соединение и учетные данные.";
+      serverChatId = await resolveMaxChatId(normalizedPhone, credentials);
+    } catch (error) {
+      return error instanceof Error
+        ? error.message
+        : "Не удалось получить идентификатор чата.";
     }
+
+    const existingByServerId = chats.find(
+      (chat) => chat.chatId === serverChatId,
+    );
+
+    if (existingByServerId) {
+      setActiveChatId(existingByServerId.id);
+      return null;
+    }
+
+    const chat: Chat = {
+      id: crypto.randomUUID(),
+      phone: normalizedPhone,
+      chatId: serverChatId,
+      messages: [],
+    };
+
+    setChats((currentChats) => [...currentChats, chat]);
+    setActiveChatId(chat.id);
+
+    return null;
   }
 
   function handleSelectChat(chatId: string) {
@@ -129,11 +124,13 @@ function App() {
         ),
       );
 
+      setSendError(null);
+
       return true;
     } catch {
       setSendError({
         localChatId: targetChat.id,
-        text: "Не удалось подтвердить отправку. Текст не очищен. Проверьте соединение и состояние инстанса.",
+        text: "Не удалось подтвердить отправку. Текст не очищен. Проверьте соединение и попробуйте отправить сообщение ещё раз.",
       });
 
       return false;

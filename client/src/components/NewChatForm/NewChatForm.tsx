@@ -13,42 +13,12 @@ import {
   CreateProgress,
 } from "./NewChatForm.styles";
 
+import { getPhoneError, normalizePhoneNumber } from "../../utils/chatId";
+
 type NewChatFormProps = {
   onCreate: (phone: string) => Promise<string | null>;
   onClose: () => void;
 };
-
-function normalizePhoneNumber(value: string) {
-  return value.replace(/[^\d+]/g, "");
-}
-
-function getPhoneError(value: string): string {
-  if (!value.trim()) {
-    return "Введите номер телефона.";
-  }
-
-  if (/\p{L}/u.test(value)) {
-    return "Номер телефона не должен содержать буквы.";
-  }
-
-  const normalized = normalizePhoneNumber(value);
-
-  if (!/\d/.test(normalized)) {
-    return "Номер телефона должен содержать цифры.";
-  }
-
-  if (!/^\+?\d+$/.test(normalized)) {
-    return "Знак + допустим только один раз в начале номера.";
-  }
-
-  const digits = normalized.replace(/^\+/, "");
-
-  if (!/^(7\d{10}|375\d{9})$/.test(digits)) {
-    return "Введите номер РФ или РБ с кодом страны 7 или 375.";
-  }
-
-  return "";
-}
 
 export function NewChatForm({ onCreate, onClose }: NewChatFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
